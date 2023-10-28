@@ -1,0 +1,15 @@
+DEFINE_TIMER(Invalid)
+
+DEFINE_TIMER(Daily)
+DEFINE_TIMER(LuaScript)
+DEFINE_TIMER(StaticLuaScript)
+
+DEFINE_TIMER(Max)
+DEFINE_TIMER(Coroutine)
+DEFINE_TIMER(Rpc)
+
+
+
+
+
+

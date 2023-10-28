@@ -1,0 +1,24 @@
+﻿  Building Custom Rule F:/3rd/zlib/zlib-1.2.11/CMakeLists.txt
+  adler32.c
+  compress.c
+  crc32.c
+  deflate.c
+  gzclose.c
+  gzlib.c
+  gzread.c
+F:\3rd\zlib\zlib-1.2.11\gzread.c(319): warning C4267: “=”: 从“size_t”转换到“unsigned int”，可能丢失数据
+F:\3rd\zlib\zlib-1.2.11\gzread.c(400): warning C4267: “=”: 从“size_t”转换到“unsigned int”，可能丢失数据
+F:\3rd\zlib\zlib-1.2.11\gzread.c(472): warning C4267: “=”: 从“size_t”转换到“int”，可能丢失数据
+  gzwrite.c
+F:\3rd\zlib\zlib-1.2.11\gzwrite.c(212): warning C4267: “=”: 从“size_t”转换到“unsigned int”，可能丢失数据
+F:\3rd\zlib\zlib-1.2.11\gzwrite.c(232): warning C4267: “=”: 从“size_t”转换到“unsigned int”，可能丢失数据
+F:\3rd\zlib\zlib-1.2.11\gzwrite.c(371): warning C4267: “=”: 从“size_t”转换到“int”，可能丢失数据
+  inflate.c
+  infback.c
+  inftrees.c
+  inffast.c
+  trees.c
+  uncompr.c
+  zutil.c
+  正在生成代码...
+  zlibstatic.vcxproj -> F:\3rd\zlib\zlib-1.2.11\build\Debug\zlibstaticd.lib

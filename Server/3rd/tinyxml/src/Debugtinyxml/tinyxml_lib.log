@@ -1,0 +1,9 @@
+﻿cl : 命令行 warning D9035: “Gm”选项已否决，并将在将来的版本中移除
+  tinyxmlparser.cpp
+  tinyxmlerror.cpp
+  tinyxml.cpp
+d:\3rd\tinyxml\tinyxml\tinyxml.cpp(670): warning C4458: “value”的声明隐藏了类成员
+  d:\3rd\tinyxml\tinyxml\tinyxml.h(761): note: 参见“TiXmlNode::value”的声明
+  tinystr.cpp
+  正在生成代码...
+  tinyxml_lib.vcxproj -> D:\3rd\tinyxml\tinyxml\Debugtinyxml\tinyxml.lib

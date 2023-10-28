@@ -1,0 +1,4 @@
+﻿  Building Custom Rule F:/3rd/zlib/zlib-1.2.11/CMakeLists.txt
+  minigzip.c
+F:\3rd\zlib\zlib-1.2.11\test\minigzip.c(503): warning C4267: “初始化”: 从“size_t”转换到“unsigned int”，可能丢失数据
+  minigzip.vcxproj -> F:\3rd\zlib\zlib-1.2.11\build\Debug\minigzip.exe
