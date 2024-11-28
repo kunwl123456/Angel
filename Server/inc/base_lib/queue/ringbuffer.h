@@ -14,10 +14,10 @@ public:
 	
 	//读取尾指针偏移index个位置后该数据（尾指针位置不变）
 	uint32_t peek(char* data, uint32_t index);
-	bool peek_arr(void* data, int len);
+	BOOL peek_arr(void* data, int len);
 
 public:
-	inline bool is_empty()
+	inline BOOL is_empty()
 	{
 		return (head_index == tail_index);
 	}

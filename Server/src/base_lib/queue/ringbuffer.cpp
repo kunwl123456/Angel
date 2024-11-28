@@ -73,7 +73,7 @@ BOOL CRingBuff::is_2power(size_t size)
 }
 
 
-bool CRingBuff::peek_arr(void* data, int len)
+BOOL CRingBuff::peek_arr(void* data, int len)
 {
 	if (remain() < len)
 		return false;

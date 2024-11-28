@@ -43,7 +43,7 @@ namespace sk {
 			rbtree_node(const V& v) :color(red), left(npos), right(npos), parent(npos), value(v) {}
 		};
 
-		template<typename T, bool C>
+		template<typename T, BOOL C>
 		struct rbtree_iterator {
 			typedef T																		tree_type;
 			typedef typename T::node														node_type;
@@ -63,7 +63,7 @@ namespace sk {
 			explicit rbtree_iterator(tree_pointer t,tree_pointer n):t(t),n(n){}
 
 
-			template<bool B>
+			template<BOOL B>
 			rbtree_iterator(const rbtree_iterator<T,B>&s):t(s.t),n(s.n){}
 
 			self& operator=(const self& s)
@@ -93,11 +93,11 @@ namespace sk {
 				return tmp;
 			}
 
-			bool operator==(const self& x) const { return n == x.n && t == x.t; }
-			bool operator!=(const self& x) const { return !(*this == x); }
+			BOOL operator==(const self& x) const { return n == x.n && t == x.t; }
+			BOOL operator!=(const self& x) const { return !(*this == x); }
 
-			bool operator==(const rbtree_iterator<T, !C>& x) const { return n == x.n && t == x.t; }
-			bool operator!=(const rbtree_iterator<T, !C>& x) const { return !(*this == x); }
+			BOOL operator==(const rbtree_iterator<T, !C>& x) const { return n == x.n && t == x.t; }
+			BOOL operator!=(const rbtree_iterator<T, !C>& x) const { return !(*this == x); }
 		};
 	}
 

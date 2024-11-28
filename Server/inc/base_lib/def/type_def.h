@@ -108,7 +108,7 @@ struct NETTIMERSTAP
 	uint64_t	llSec;
 	uint64_t	dwUSec;
 	uint64_t	dwCumm;
-	bool		iIsAvailable;
+	BOOL		iIsAvailable;
 };
 
 #endif

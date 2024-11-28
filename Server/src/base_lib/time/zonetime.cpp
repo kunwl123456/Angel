@@ -1,4 +1,10 @@
 #include "zonetime.h"
+#include "utility.h"
+#include "string_func.h"
+
+
+CZoneTime* CZoneTime::instance = nullptr;
+std::mutex CZoneTime::mutex;
 
 int gettimeofday(struct timeval* tp, void* tzp)
 #if defined(_WIN32) || defined(_WIN64)
@@ -30,7 +36,8 @@ int gettimeofday(struct timeval* tp, void* tzp)
 #endif //gettimeofday
 
 
-CZoneTime::CZoneTime() : m_illLastSecond(0), m_iMaxID(1), m_iGMOffsetSec(0), m_iCfgUpdateTimeAlarmThreshold(3), m_illTimeStrSec(0)
+CZoneTime::CZoneTime()
+    : m_illLastSecond(0), m_iMaxID(1), m_iGMOffsetSec(0), m_iCfgUpdateTimeAlarmThreshold(3), m_illTimeStrSec(0)
 {
     m_iTimeZoneSec = _GetTimeZoneMinute() * ONE_MIN_SECONDS;
     UpdateTime();
@@ -148,8 +155,23 @@ int32_t CZoneTime::GetCurIDInSecond()
     return  m_iMaxID;
 }
 
-uint64_t CZoneTime::GetCpuTickCnt()
-{
+uint64_t CZoneTime::GetCpuTickCnt() {
+#if defined(_WIN32) || defined(_WIN64)
+
+    uint32_t a, d;
+    uint64_t result;
+
+    // 使用 intrinsic 函数
+    __cpuid(nullptr, 0);
+    result = __rdtsc();
+
+    a = (uint32_t)(result & 0xFFFFFFFF);
+    d = (uint32_t)(result >> 32);
+
+    return (((uint64_t)a) | (((uint64_t)d) << 32));
+
+#else
+
     uint32_t a, d;
     uint32_t eax, ebx, ecx, edx;
 
@@ -157,6 +179,28 @@ uint64_t CZoneTime::GetCpuTickCnt()
     asm volatile("rdtsc" : "=a" (a), "=d" (d));
 
     return (((uint64_t)a) | (((uint64_t)d) << 32));
+
+#endif
+}
+
+CZoneTime* CZoneTime::getInstance()
+{
+    if (!instance)
+    {
+        std::lock_guard<std::mutex> lock(mutex); // 线程安全
+        if (instance == nullptr) {
+            instance = new CZoneTime();
+        }
+    }
+    return instance;
+}
+
+void CZoneTime::releaseInstance()
+{
+    if (instance != nullptr) {
+        delete instance;
+        instance = nullptr;
+    }
 }
 
 void CZoneTime::CutSecToMidNightSpare(int64_t illNowSec, int64_t& rillMidNightSec, int64_t& rillSpareSec) const
@@ -1128,7 +1172,7 @@ char* CZoneTime::GetCurDateTimeStr()
     if (GetCurSecond(false) != m_illTimeStrSec)
     {
         // 更新下时间戳
-        time_t iCurSecond = CZoneTime::Instance().GetCurSecond();
+        time_t iCurSecond = CZoneTime::getInstance()->GetCurSecond();
         m_illTimeStrSec = iCurSecond;
 
         // 更新下当前秒对应的DataStrBuff
@@ -1234,7 +1278,7 @@ int32_t CZoneTime::_GetTimeZoneMinute()
     //         fOffsetFromUTC -= 60;
     //     }
 
-    return (int)fOffsetFromUTC;
+    return (int32_t)fOffsetFromUTC;
 }
 
 // 返回当天的第二天的0点时间戳
@@ -1267,11 +1311,13 @@ int64_t CZoneTime::GetNextMonthZeroTime()
     return llCurTime + llDayResidueTIme + iResidueDay * ONE_DAY_SECONDS;
 }
 
-CPerfPrinter::CPerfPrinter(const std::string& strTitle)
-    : m_szTitle(strTitle), m_llBegin(0), m_llEnd(0)
+CPerfPrinter::CPerfPrinter(const char* strTitle)
+    : m_llBegin(0), m_llEnd(0)
 {
+
     TIME_VAL stTV;
     gettimeofday(&stTV, NULL);
+    StrCpy(m_szTitle, strTitle, strlen(strTitle));
     m_llBegin = stTV.tv_sec * 1000 + stTV.tv_usec / 1000;
     //LOGSTAT("%s begin at %ld MS", m_strTitle.c_str(), m_llBegin);
 }

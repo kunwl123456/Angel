@@ -20,7 +20,7 @@ extern "C"
 	int32_t set_time_stamp(NETTIMERSTAP& time_stamp, int process_usec = 0);
 
 	CHANNELINFO* find_channel(CHANNELID channel_id);
-	CHANNELINFO* find_dst_channel(WBUSADDR src_id, WBUSADDR dst_id, bool with_recv_data);
+	CHANNELINFO* find_dst_channel(WBUSADDR src_id, WBUSADDR dst_id, BOOL with_recv_data);
 	int32_t get_channel_addr(WBUSADDR* out_addrs,int& out_cnt,int svr_type=-1);
 	int32_t channel_send(CHANNELID channel_id, char* buf, size_t len);
 	int32_t channel_sendv(CHANNELID channel_id, const struct iovec* a_ptVector, const int a_iVecCnt);

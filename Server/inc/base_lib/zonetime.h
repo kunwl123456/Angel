@@ -5,14 +5,16 @@
 #include    <string.h>
 #include    <stdlib.h>
 #include    <assert.h>
-
+#include    <mutex>
 #if defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
+#define localtime_r(a,b) localtime_s(b,a)
 #else
 #include    <sys/time.h>
 #include    <sys/timeb.h>
 #endif// defined(_WIN32) || defined(_WIN64)
-
+#include    <cstdint>
+#include    <intrin.h>
 #include    <time.h>
 #include    <string>
 
@@ -41,7 +43,7 @@
 #define MAX_PRINTER_LEN            (64)
 
 //----------------------
-#define COM_SECTIMESTAMP_AT_2020  = 1577808000, // 2020年1月1日0点的时间戳秒数
+#define COM_SECTIMESTAMP_AT_2020   (1577808000) // 2020年1月1日0点的时间戳秒数
 
 typedef struct timeval TIME_VAL;
 
@@ -73,13 +75,17 @@ struct ST_DATE
 
 
 
-class CZoneTime: 
+class CZoneTime
 {
 public:
     CZoneTime();
     ~CZoneTime();
 
 public:
+    static CZoneTime* getInstance();
+    static void releaseInstance();
+    static std::mutex mutex;
+
     void UpdateTime(BOOL bCheckModifyTime = true);
 
     const TIME_VAL& GetCurTime(BOOL bRealTime = false);
@@ -245,6 +251,8 @@ private:
     // 判断时间变更间隔
     void            _CheckSysTimeSkip();
 
+    CZoneTime(const CZoneTime&) = delete;
+    CZoneTime& operator=(const CZoneTime&) = delete;
 private:
     TIME_VAL        m_stCurrTv;
     TIME_VAL        m_stRealTv;
@@ -255,6 +263,7 @@ private:
     int32_t         m_iCfgUpdateTimeAlarmThreshold; // 服务器更新时间戳的最大变更秒，如果超过这个值，则告警
     int64_t         m_illTimeStrSec; // m_szCurTimeStr对应的秒
     char            m_szCurTimeStr[MAX_CUR_TIME_LEN]; // 当前秒的%04Y-%02M-%02D %02H:%02M:%02S格式
+    static CZoneTime* instance;
 };
 
 

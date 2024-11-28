@@ -37,7 +37,7 @@ namespace sk {
 
 	};
 
-	template<bool B,typename T,typename F>
+	template<BOOL B,typename T,typename F>
 	struct if_;
 
 	template<typename T,typename F>
@@ -54,7 +54,7 @@ namespace sk {
 
 		equip_key(K key)
 			:_key(key){}
-		bool operator()(value_type& val) { return val.key() == _key; }
+		BOOL operator()(value_type& val) { return val.key() == _key; }
 	};
 }	//namespace sk
 
@@ -72,6 +72,11 @@ namespace sk {
 		{											\
 			return (val);							\
 		} while (0)									\
+
+
+
+
+
 
 #endif  //UTILITY_H_
 

@@ -9,7 +9,7 @@
 extern "C" {
 #endif /* __cplusplus  */
 
-	int32_t init_wbus_cfg(const char* name, bool resume, AGBUSLOCALINFO& info);
+	int32_t init_wbus_cfg(const char* name, BOOL resume, AGBUSLOCALINFO& info);
 	void uninit_wbus_cfg();
 
 	int32_t get_wbus_cfg_addrs(WBUSADDR* (&addrs), int32_t& count);

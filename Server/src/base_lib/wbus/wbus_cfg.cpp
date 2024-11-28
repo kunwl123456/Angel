@@ -20,7 +20,7 @@ extern "C" {
 	//static sk::fixed_map<CHANNELID, AGBUSPAIRNETADDR*, MAX_CHANNEL_CNT> g_server_bubs_addr_map;
 	static std::map<CHANNELID, AGBUSPAIRNETADDR*> g_server_bubs_addr_map;
 
-	int32_t _init_data(bool resume)
+	int32_t _init_data(BOOL resume)
 	{
 		g_server_bubs_addr_map.clear();
 		//g_server_bubs_addr_map.init();
@@ -37,12 +37,12 @@ extern "C" {
 		return AGERR_SUCCESS;
 	}
 
-	int32_t init_wbus_cfg(const char* name, bool resume, AGBUSLOCALINFO& info)
+	int32_t init_wbus_cfg(const char* name, BOOL resume, AGBUSLOCALINFO& info)
 	{
 		if (!name) return errParamInvalid;
 		TiXmlDocument doc;
 		const TiXmlElement*  elm = NULL;
-		bool ok = doc.LoadFile();
+		BOOL ok = doc.LoadFile();
 		if (!ok)
 		{
 			printf("server config file:%s load failed,error :%s\n", name, doc.ErrorDesc());

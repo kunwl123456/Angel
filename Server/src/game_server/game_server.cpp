@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "game_server.h"
 #include <iostream>
 
@@ -20,7 +20,7 @@ CGameServer* CGameServer::getInstance()
 {
     if (!instance)
     {
-        std::lock_guard<std::mutex> lock(mutex); // Ïß³Ì°²È«
+        std::lock_guard<std::mutex> lock(mutex); // çº¿ç¨‹å®‰å…¨
         if (instance == nullptr) {
             instance = new CGameServer();
         }
@@ -68,12 +68,12 @@ BOOL CGameServer::_InitProcConfig(const char* szConfig)
 }
 
 
-int main()
+int32_t main(int argc, char* argv[])
 {
 
-    //1¡¢init log cfg
+    //1ã€init log cfg
 
-    //2¡¢
+    //2ã€
     char        sConfFilePath[SVR_PATH_MAX] = { 0 };
     if (!CGameServer::getInstance()->Init(sConfFilePath))
     {
@@ -83,7 +83,7 @@ int main()
 
     CGameServer::getInstance()->MainLoop(sConfFilePath);
 
-	printf("game_server ready122223333!\n");
+    printf("game_server ready122223333!\n");
     printf("game_server ready!\n");
     return 0;
 }

@@ -52,8 +52,8 @@ extern "C"
 	static void listener_peer_cb(struct evconnlistener* listener,
 		evutil_socket_t fd,struct sockaddr* sa,int socklen,void* user_data);
 
-	bool pop_event(NETWORKEVENT& evt, int type, char* data, int len);
-	bool push_event(NETWORKEVENT& evt, int type, struct bufferevent* bev);
+	BOOL pop_event(NETWORKEVENT& evt, int type, char* data, int len);
+	BOOL push_event(NETWORKEVENT& evt, int type, struct bufferevent* bev);
 
 	static void _close_link(LINKBASE* base, struct bufferevent* bev);
 	static int32_t _network_init(TAPPCTX* a_pstCtx);
@@ -113,7 +113,7 @@ extern "C"
 	int tapp_network_init()
 	{
 		if (!g_app_ctx) return ANGEL_NULL_POINTER;
-		bool is_resume = g_app_ctx->iStartMode == TAPP_START_MODE_RESUME;
+		BOOL is_resume = g_app_ctx->iStartMode == TAPP_START_MODE_RESUME;
 
 		network_data_init(is_resume);
 		init_wbus_cfg(g_app_ctx->pszConfFile, is_resume, g_local_info);
@@ -488,7 +488,7 @@ extern "C"
 
 	}
 
-	bool push_event(NETWORKEVENT& evt, int type, struct bufferevent* bev)
+	BOOL push_event(NETWORKEVENT& evt, int type, struct bufferevent* bev)
 	{
 		switch (type)
 		{
@@ -515,7 +515,7 @@ extern "C"
 	}
 
 
-	bool pop_event(NETWORKEVENT& evt, int type, char* data, int len)
+	BOOL pop_event(NETWORKEVENT& evt, int type, char* data, int len)
 	{
 		switch (type)
 		{
@@ -774,7 +774,7 @@ extern "C"
 		return AGERR_SUCCESS;
 	}
 
-	CHANNELINFO* find_dst_channel(WBUSADDR src_id, WBUSADDR dst_addr, bool with_recv_data)
+	CHANNELINFO* find_dst_channel(WBUSADDR src_id, WBUSADDR dst_addr, BOOL with_recv_data)
 	{
 		auto it = g_channel_info_map.begin();
 		for (; it != g_channel_info_map.end(); ++it)

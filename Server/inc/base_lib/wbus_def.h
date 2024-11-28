@@ -239,7 +239,7 @@ struct tag_channel_info :public LINKBASE
 	NETTIMESTAP time_stamp;
 	//!process state
 	long long llLastBeatTime;
-	bool is_connected;
+	BOOL is_connected;
 };
 
 typedef struct tag_channel_info CHANNELINFO;
@@ -460,7 +460,7 @@ typedef struct tagAGBusPairNetAddr
 	AGVIRTUALADDR bus2;
 	int recv_buf_size;
 	int send_bus_size;
-	bool connected;
+	BOOL connected;
 	CHANNELID channel_id;
 }AGBUSPAIRNETADDR;
 
