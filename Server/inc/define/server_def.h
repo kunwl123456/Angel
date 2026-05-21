@@ -5,6 +5,7 @@
 
 #include "def/type_def.h"
 #include <functional>
+#include <list>
 
 
 #define MAX_GS_COUNT				(256)
@@ -22,17 +23,17 @@ enum SERVER_TYPE
 {
 	svrInvalid = 0,
 	
-	svrGW = 2,
-	svrGS = 3,
-	svrWS = 4,
-	svrSS = 5,
-	svrPS = 6,
-	svrTS = 7,
-	svrCS = 8,
-	svrMCS = 9,
-	svrFS = 10,
-	svrGuild = 11,
-	svrGlobal = 12,
+	svrGW = 2,      // gateway_server: client access and C2S/S2C relay
+	svrGS = 3,      // game_server: core gameplay and SS/DB coordination
+	svrWS = 4,      // world_server: GameCenter/lobby/world routing
+	svrSS = 5,      // scene_server: scene instance, movement, AOI
+	svrPS = 6,      // platform_server: account, SDK, payment/platform integration
+	svrTS = 7,      // team_server: team, matchmaking, queueing
+	svrCS = 8,      // cross_server: cross-zone gameplay
+	svrMCS = 9,     // master_control_server: cluster orchestration and routing
+	svrFS = 10,     // friend_server: friend/social data
+	svrGuild = 11,  // guild_server: guild data and guild gameplay
+	svrGlobal = 12, // global_server: global singleton data and services
 
 
 	svrTotal
@@ -59,16 +60,16 @@ enum GAME_SERVER_STATE_TYPE
 
 enum CONFIG_TYPE
 {
-    CONFIG_TYPE_NONE                 = 0, // 无效
-    CONFIG_TYPE_MAIN                 = 1, // 进程配置
-    CONFIG_TYPE_WHITELIST            = 2, // gamesvr 白名单
-    CONFIG_TYPE_TESTACNT             = 3, // 测试账号
-    CONFIG_TYPE_MSGFREQLIST          = 4, // 消息频率限制
-    CONFIG_TYPE_SSMSGFREQLIST        = 5, // SS消息频率限制
-    CONFIG_TYPE_DBOPFREQLIST         = 6, // DB操作频率限制
-    CONFIG_TYPE_GAMETOOS             = 7, // gametools 配置
-    CONFIG_TYPE_CLIENTRESFOLDERS     = 8, //需要服务器加载并下发给客户端的资源目录 
-    CONFIG_TYPE_LOCAL_RELAY_TESTACNT = 9, //本地服白名单配置 
+    CONFIG_TYPE_NONE                 = 0, // ????
+    CONFIG_TYPE_MAIN                 = 1, // ????????
+    CONFIG_TYPE_WHITELIST            = 2, // gamesvr ??????
+    CONFIG_TYPE_TESTACNT             = 3, // ???????
+    CONFIG_TYPE_MSGFREQLIST          = 4, // ??????????
+    CONFIG_TYPE_SSMSGFREQLIST        = 5, // SS??????????
+    CONFIG_TYPE_DBOPFREQLIST         = 6, // DB???????????
+    CONFIG_TYPE_GAMETOOS             = 7, // gametools ????
+    CONFIG_TYPE_CLIENTRESFOLDERS     = 8, // client resource folders
+    CONFIG_TYPE_LOCAL_RELAY_TESTACNT = 9, // local relay test account whitelist
     //TODO:other type
 };
 

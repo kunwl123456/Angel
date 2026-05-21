@@ -10,7 +10,7 @@ extern "C"
 {
 #endif /* __cplusplus */
 	int32_t tapp_network_init();
-	void tapp_netword_uninit();
+	void tapp_network_uninit();
 	int32_t tapp_network_run();
 	void network_loop();
 	WBUSADDR get_local_addr();
@@ -38,7 +38,7 @@ extern "C"
 	int32_t on_channel_connected(CHANNELINFO* info);
 	int32_t on_channel_closed(CHANNELINFO* info);
 
-	//¡Ÿ ±ÃÌº”  to do seb
+	//√Å√ô√ä¬±√å√≠¬º√ì  to do seb
 	uint32_t round_up_2power(int32_t size);
 	int64_t cur_time();
 #ifdef __cplusplus

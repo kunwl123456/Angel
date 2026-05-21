@@ -6,7 +6,7 @@
 class CGameWorld
 {
 public:
-	CGameWorld() {}
+	CGameWorld() : m_pGWData(NULL), m_nGSIndex(0), m_nAreaID(0) {}
 	~CGameWorld() {}
 	inline static CGameWorld& instance(void);
 

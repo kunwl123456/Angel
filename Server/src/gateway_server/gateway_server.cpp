@@ -2,10 +2,22 @@
 
 #include "gateway_server.h"
 
-#include <iostream>
-
-int main()
+CGatewayServerApp::CGatewayServerApp()
+	:CSsGameServerApp(svrGW)
 {
-    printf("game_server ready!\n");
-    return 0;
+}
+
+const char* CGatewayServerApp::GetName() const
+{
+	return "gateway_server";
+}
+
+int main(int argc, char* argv[])
+{
+	static CGatewayServerApp app;
+	if (!app.init(argc, argv))
+	{
+		return -1;
+	}
+	return app.Run();
 }

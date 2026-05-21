@@ -1,10 +1,22 @@
 #include "stdafx.h"
 #include "dbcache_server.h"
-#include <iostream>
 
-
-int main()
+CDbCacheServerApp::CDbCacheServerApp()
+	:CSsGameServerApp(svrInvalid)
 {
-    printf("game_server ready!\n");
-    return 0;
+}
+
+const char* CDbCacheServerApp::GetName() const
+{
+	return "dbcache_server";
+}
+
+int main(int argc, char* argv[])
+{
+	static CDbCacheServerApp app;
+	if (!app.init(argc, argv))
+	{
+		return -1;
+	}
+	return app.Run();
 }

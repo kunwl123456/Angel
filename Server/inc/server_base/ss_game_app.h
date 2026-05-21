@@ -3,6 +3,7 @@
 
 #include <map>
 #include "app/tapp.h"
+#include "define/server_def.h"
 
 class CGameLog;
 class CGameCfg;
@@ -24,9 +25,9 @@ public:
 	virtual ~CSsGameApp();
 
 public:
-	BOOL init();
+	BOOL init(int argc, char* argv[]);
 	void Destroy();
-	void Run();
+	int Run();
 	virtual const char* GetName() const = 0;
 	virtual void GetWin(int& x, int& y);
 	virtual CRedis* GetDb();
@@ -147,6 +148,7 @@ protected:
 	BOOL m_Quit;
 	CGameLog* m_Log;
 	CGameCfg* m_Cfg;
+	BOOL m_NetworkStarted;
 	int m_TimeZone;
 	time_t m_RealTime;
 	uint64_t m_RealTimestamp;
@@ -162,6 +164,152 @@ protected:
 
 
 };
+
+inline TAPPCTX& CSsGameApp::get_ctx()
+{
+	return m_Ctx;
+}
+
+inline int CSsGameApp::get_id() const
+{
+	return m_Ctx.iId;
+}
+
+inline const char* CSsGameApp::get_bus_id() const
+{
+	return m_Ctx.pszId;
+}
+
+inline int CSsGameApp::GetTick() const
+{
+	return m_Ctx.iTickCount;
+}
+
+inline int CSsGameApp::GetTimeZone() const
+{
+	return m_TimeZone;
+}
+
+inline uint64_t CSsGameApp::GetCurTimestamp() const
+{
+	return m_RealTimestamp + m_llTimeDiff;
+}
+
+inline time_t CSsGameApp::GetCurTime() const
+{
+	return static_cast<time_t>(GetCurTimestamp());
+}
+
+inline time_t CSsGameApp::GetRealTime() const
+{
+	return m_RealTime;
+}
+
+inline struct tm CSsGameApp::GetCurLocalTime() const
+{
+	return m_CurLocalTime;
+}
+
+inline uint64_t CSsGameApp::GetStartTick() const
+{
+	return m_StartTick;
+}
+
+inline uint64_t CSsGameApp::GetCurTick() const
+{
+	return m_RealTick;
+}
+
+inline uint64_t CSsGameApp::GetRealTick() const
+{
+	return m_RealTick;
+}
+
+inline int64_t CSsGameApp::GetCurFrame() const
+{
+	return m_CurFrame;
+}
+
+inline int32_t CSsGameApp::GetState() const
+{
+	return m_State;
+}
+
+inline void CSsGameApp::SetState(int32_t val)
+{
+	m_State = val;
+}
+
+inline uint64_t CSsGameApp::GetStopTimer(uint64_t val)
+{
+	(void)val;
+	return m_StopTimer;
+}
+
+inline void CSsGameApp::SetStopTimer(uint64_t val)
+{
+	m_StopTimer = val;
+}
+
+inline int64_t CSsGameApp::GetTimeDiff() const
+{
+	return m_llTimeDiff;
+}
+
+inline void CSsGameApp::SetTimeDiff(int64_t val)
+{
+	m_llTimeDiff = val;
+}
+
+inline void CSsGameApp::SetStopFlag(BOOL bStopFlag)
+{
+	m_bStopFlag = bStopFlag;
+}
+
+inline void CSsGameApp::SetTimeDatModifyTime(int64_t val)
+{
+	m_llTimeDatModifyTime = val;
+}
+
+inline int64_t CSsGameApp::GetTimeDatModifyTime() const
+{
+	return m_llTimeDatModifyTime;
+}
+
+inline void CSsGameApp::set_time_zone(int val)
+{
+	m_TimeZone = val;
+}
+
+inline void CSsGameApp::set_read_time(time_t val)
+{
+	m_RealTime = val;
+}
+
+inline void CSsGameApp::set_real_timestamp(uint64_t val)
+{
+	m_RealTimestamp = val;
+}
+
+inline void CSsGameApp::set_cur_local_time(const struct tm& val)
+{
+	m_CurLocalTime = val;
+}
+
+inline void CSsGameApp::set_start_tick(uint64_t val)
+{
+	m_StartTick = val;
+}
+
+inline void CSsGameApp::set_real_tick(uint64_t val)
+{
+	m_RealTick = val;
+}
+
+inline void CSsGameApp::set_cur_frame(int64_t val)
+{
+	m_CurFrame = val;
+}
 
 
 #endif// _H_SS_GAMEAPP_H__

@@ -1,10 +1,22 @@
 #include "stdafx.h"
 #include "dbmanager_server.h"
 
-#include <iostream>
-
-int main()
+CDbManagerServerApp::CDbManagerServerApp()
+	:CSsGameServerApp(svrInvalid)
 {
-    printf("game_server ready!\n");
-    return 0;
+}
+
+const char* CDbManagerServerApp::GetName() const
+{
+	return "dbmanager_server";
+}
+
+int main(int argc, char* argv[])
+{
+	static CDbManagerServerApp app;
+	if (!app.init(argc, argv))
+	{
+		return -1;
+	}
+	return app.Run();
 }

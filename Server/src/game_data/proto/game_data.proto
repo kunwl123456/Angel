@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package angel.game_data;
+
+message GameDataPing {
+  uint64 ts = 1;
+}

@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package angel.game_world;
+
+message MovementFragment {
+  int32 x = 1;
+  int32 y = 2;
+  int32 next_x = 3;
+  int32 next_y = 4;
+  int32 duration = 5;
+}

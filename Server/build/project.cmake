@@ -109,7 +109,7 @@ function (post_project APP_TYPE)
 				optimized base_lib.lib
 			)
 		endif()
-		if(TARGET_TYPE STREQUAL "SERVER")
+		if(APP_TYPE STREQUAL "SERVER")
 			target_link_libraries(${TARGET_NAME}
 				debug libexpatd.lib
 				optimized libexpat.lib

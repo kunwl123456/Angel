@@ -1,5 +1,6 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "game_server.h"
+#include "game_world/game_world.h"
 #include <iostream>
 
 
@@ -43,12 +44,22 @@ BOOL CGameServer::_BeginPreExit()
 
 BOOL CGameServer::Init(const char* szConfig)
 {
+    if (!_InitProcConfig(szConfig))
+    {
+        return FALSE;
+    }
+    if (!CGameWorld::instance().init())
+    {
+        return FALSE;
+    }
     return TRUE;
 }
 
 
 BOOL CGameServer::MainLoop(const char* szConfig)
 {
+    (void)szConfig;
+    CGameWorld::instance().mainloop();
     return TRUE;
 }
 
@@ -59,31 +70,100 @@ void CGameServer::CreateReloadThread(const char* szConfig)
 
 BOOL CGameServer::CanExit()
 {
-    return TRUE;
+    return CFramServer::CanExit();
 }
 
 BOOL CGameServer::_InitProcConfig(const char* szConfig)
 {
+    (void)szConfig;
     return TRUE;
 }
 
 
-int32_t main(int argc, char* argv[])
+CGameServerApp::CGameServerApp()
+    :CSsGameServerApp(svrGS),
+    m_BeginExit(FALSE)
 {
+}
 
-    //1、init log cfg
+CGameServerApp::~CGameServerApp()
+{
+}
 
-    //2、
-    char        sConfFilePath[SVR_PATH_MAX] = { 0 };
-    if (!CGameServer::getInstance()->Init(sConfFilePath))
+const char* CGameServerApp::GetName() const
+{
+    return "game_server";
+}
+
+BOOL CGameServerApp::OnInit(BOOL bResume)
+{
+    if (!CSsGameServerApp::OnInit(bResume))
     {
+        return FALSE;
+    }
+    if (!CGameServer::getInstance()->Init(get_ctx().pszConfFile ? get_ctx().pszConfFile : ""))
+    {
+        return FALSE;
+    }
+    SetState(gsstReady);
+    return TRUE;
+}
 
-        return -1;
+BOOL CGameServerApp::OnTick()
+{
+    CGameServer::getInstance()->MainLoop(get_ctx().pszConfFile ? get_ctx().pszConfFile : "");
+    return TRUE;
+}
+
+BOOL CGameServerApp::OnQuit()
+{
+    CGameServer* server = CGameServer::getInstance();
+    if (!m_BeginExit)
+    {
+        server->_BeginPreExit();
+        SetState(gsstStopWaitForC2gMsgClear);
+        m_BeginExit = TRUE;
     }
 
-    CGameServer::getInstance()->MainLoop(sConfFilePath);
+    switch (GetState())
+    {
+    case gsstStopWaitForC2gMsgClear:
+        SetState(gsstStopWaitForServerReply);
+        break;
+    case gsstStopWaitForServerReply:
+        SetState(gsstStopWaitForSaveRole);
+        break;
+    case gsstStopWaitForSaveRole:
+        SetState(gsstStopWaitForPoolClear);
+        break;
+    case gsstStopWaitForPoolClear:
+        SetState(gsstStopComplete);
+        break;
+    case gsstStopComplete:
+        SetState(gsstClosed);
+        CFramServer::SetExited();
+        break;
+    default:
+        SetState(gsstClosed);
+        CFramServer::SetExited();
+        break;
+    }
+    return server->CanExit();
+}
 
-    printf("game_server ready122223333!\n");
-    printf("game_server ready!\n");
-    return 0;
+BOOL CGameServerApp::OnFini()
+{
+    CGameWorld::instance().uninit();
+    CGameServer::releaseInstance();
+    return TRUE;
+}
+
+int32_t main(int argc, char* argv[])
+{
+    static CGameServerApp app;
+    if (!app.init(argc, argv))
+    {
+        return -1;
+    }
+    return app.Run();
 }

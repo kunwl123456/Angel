@@ -42,7 +42,7 @@ extern "C" {
 		if (!name) return errParamInvalid;
 		TiXmlDocument doc;
 		const TiXmlElement*  elm = NULL;
-		BOOL ok = doc.LoadFile();
+		BOOL ok = doc.LoadFile(name);
 		if (!ok)
 		{
 			printf("server config file:%s load failed,error :%s\n", name, doc.ErrorDesc());
@@ -119,6 +119,7 @@ extern "C" {
 			}
 
 		}
+		return AGERR_SUCCESS;
 	}
 
 	void uninit_wbus_cfg()
