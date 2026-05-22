@@ -32,18 +32,18 @@ if(UNIX)
 	if(${is_release})
 		if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.8)
 			message("compile with avx2intrin")
-			set(CMAKE_CXX_FLAGS "-fpIC -O2 -g -mavx2 -std=c++0x -Wpointer-arith -Warray-bounds")
+			set(CMAKE_CXX_FLAGS "-fPIC -O2 -g -mavx2 -std=c++0x -Wpointer-arith -Warray-bounds")
 			add_definitions(-DUSING_AVX)
 		else()
-			set(CMAKE_CXX_FLAGS "-fpIC -O2 -g -msse4.2 -std=c++0x -Wpointer-arith -Warray-bounds")
+			set(CMAKE_CXX_FLAGS "-fPIC -O2 -g -msse4.2 -std=c++0x -Wpointer-arith -Warray-bounds")
 		endif()
 	elseif(${is_debug})
 		add_definitions(-DNDEBUG)
 		if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.8)
-			set(CMAKE_CXX_FLAGS "-fpIC -g -mavx2 -std=c++11 -Wpointer-arith -Warray-bounds -fdiagnostics-color=auto")
+			set(CMAKE_CXX_FLAGS "-fPIC -g -mavx2 -std=c++11 -Wpointer-arith -Warray-bounds -fdiagnostics-color=auto")
 			add_definitions(-DUSING_AVX)
 		else()
-			set(CMAKE_CXX_FLAGS "-fpIC -g -msse4.2 -std=c++1 -Wpointer-arith -Warray-bounds")
+			set(CMAKE_CXX_FLAGS "-fPIC -g -msse4.2 -std=c++1 -Wpointer-arith -Warray-bounds")
 		endif()
 	endif()
 	
@@ -93,12 +93,62 @@ include_directories(
 	${BASE_DIR}/3rd/tinyxml/include
 )
 
+get_filename_component(NFSHMXFRAME_ROOT ${BASE_DIR}/../../NFShmXFrame ABSOLUTE)
+set(NFSHMXFRAME_LUABIND_DIR ${NFSHMXFRAME_ROOT}/thirdparty/LuaBind)
+if(EXISTS ${NFSHMXFRAME_LUABIND_DIR}/luaintf/LuaIntf.h)
+	message("NFShmXFrame LuaBind found: ${NFSHMXFRAME_LUABIND_DIR}")
+	add_definitions(-DANGEL_WITH_NFSHMXFRAME_LUABIND)
+	include_directories(
+		${NFSHMXFRAME_LUABIND_DIR}
+		${NFSHMXFRAME_LUABIND_DIR}/lua
+		${NFSHMXFRAME_LUABIND_DIR}/luaintf
+		${NFSHMXFRAME_LUABIND_DIR}/lpeg
+		${NFSHMXFRAME_LUABIND_DIR}/luacjson
+		${NFSHMXFRAME_LUABIND_DIR}/luafilesystem
+		${NFSHMXFRAME_LUABIND_DIR}/lua_protobuf
+		${NFSHMXFRAME_LUABIND_DIR}/lua-fmt
+		${NFSHMXFRAME_LUABIND_DIR}/protoc-gen-lua
+	)
+	file(GLOB_RECURSE ANGEL_LUABIND_SRC
+		"${NFSHMXFRAME_LUABIND_DIR}/lua/*.c"
+		"${NFSHMXFRAME_LUABIND_DIR}/lpeg/*.c"
+		"${NFSHMXFRAME_LUABIND_DIR}/luacjson/*.c"
+		"${NFSHMXFRAME_LUABIND_DIR}/luafilesystem/*.c"
+		"${NFSHMXFRAME_LUABIND_DIR}/lua_protobuf/*.c"
+		"${NFSHMXFRAME_LUABIND_DIR}/lua-fmt/*.c"
+		"${NFSHMXFRAME_LUABIND_DIR}/protoc-gen-lua/*.c"
+	)
+	add_library(angel_luabind STATIC ${ANGEL_LUABIND_SRC})
+	target_include_directories(angel_luabind PUBLIC
+		${NFSHMXFRAME_LUABIND_DIR}
+		${NFSHMXFRAME_LUABIND_DIR}/lua
+		${NFSHMXFRAME_LUABIND_DIR}/luaintf
+		${NFSHMXFRAME_LUABIND_DIR}/lpeg
+		${NFSHMXFRAME_LUABIND_DIR}/luacjson
+		${NFSHMXFRAME_LUABIND_DIR}/luafilesystem
+		${NFSHMXFRAME_LUABIND_DIR}/lua_protobuf
+		${NFSHMXFRAME_LUABIND_DIR}/lua-fmt
+		${NFSHMXFRAME_LUABIND_DIR}/protoc-gen-lua
+	)
+else()
+	message("NFShmXFrame LuaBind not found; Angel Lua module will build as a skeleton")
+endif()
+
 link_directories(
 	${BASE_DIR}/lib
 	${BASE_DIR}/3rd
 	${BASE_DIR}/3rd/libevent/lib
 	${BASE_DIR}/3rd/tinyxml/lib
 )
+
+file(GLOB ANGEL_TINYXML_SRC
+	"${BASE_DIR}/3rd/tinyxml/src/tinystr.cpp"
+	"${BASE_DIR}/3rd/tinyxml/src/tinyxml.cpp"
+	"${BASE_DIR}/3rd/tinyxml/src/tinyxmlerror.cpp"
+	"${BASE_DIR}/3rd/tinyxml/src/tinyxmlparser.cpp"
+)
+add_library(angel_tinyxml STATIC ${ANGEL_TINYXML_SRC})
+target_include_directories(angel_tinyxml PUBLIC ${BASE_DIR}/3rd/tinyxml/include ${BASE_DIR}/3rd/tinyxml/src)
 
 preprocess_proto("../Shared/proto")
 preprocess_proto("src/game_data/proto")

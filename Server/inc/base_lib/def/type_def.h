@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <time.h>
 #include <sys/types.h>
+#include <typeinfo>
 
 #ifndef TRUE
 #define TRUE (1)
@@ -13,7 +14,6 @@
 #define FALSE (0)
 #endif
 typedef int BOOL;
-
 
 #if !defined(_WIN32) && !defined(_WIN64)
 #include <stdint.h>
@@ -43,6 +43,27 @@ typedef int BOOL;
 	typedef signed	  __int64 int64_t;
 	typedef unsigned  __int64 uint64_t;
 
+#endif
+
+typedef char CHAR;
+typedef unsigned char BYTE;
+typedef int8_t INT8;
+typedef uint8_t UINT8;
+typedef int16_t INT16;
+typedef uint16_t UINT16;
+typedef int32_t INT32;
+typedef uint32_t UINT32;
+typedef int64_t INT64;
+typedef uint64_t UINT64;
+typedef float FLOAT;
+typedef double DOUBLE;
+
+#if !defined(_WIN32) && !defined(_WIN64)
+typedef ssize_t SSIZE_T;
+#endif
+
+#ifndef POOL_NAME_LEN
+#define POOL_NAME_LEN 128
 #endif
 
 #if defined(_WIN32) || defined(_WIN64)
@@ -85,13 +106,13 @@ void SWAP(T& a, T& b)
 {
 	T tmp = a;
 	a = b;
-	b = temp;
+	b = tmp;
 }
 
 #define FLT_EPS  (1.192092896e-04F)
 #define FLT_BZERO  (-FLT_EPS)
 #define FLT_HZERO  (FLT_EPS)
-//Ç÷½üÓÚ0
+//0
 #define FLT_ZERO(x)   (x>= FLT_BZERO && x <= FLT_HZERO)
 
 #ifndef ARRAYSIZE

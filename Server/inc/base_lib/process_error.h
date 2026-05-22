@@ -8,7 +8,7 @@
 #define unlikely(x)  (x)
 #else
 #define likely(x)     __builtin_expect(!!(x),1)
-#define likely(x)     __builtin_expect(!!(x),0)
+#define unlikely(x)   __builtin_expect(!!(x),0)
 #endif 
 
 #define LOG_PROCESS_ERROR(__condition__)                    \

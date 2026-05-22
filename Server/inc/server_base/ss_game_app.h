@@ -4,6 +4,7 @@
 #include <map>
 #include "app/tapp.h"
 #include "define/server_def.h"
+#include "server_base/lua/angel_lua_loader.h"
 
 class CGameLog;
 class CGameCfg;
@@ -148,6 +149,7 @@ protected:
 	BOOL m_Quit;
 	CGameLog* m_Log;
 	CGameCfg* m_Cfg;
+	CAngelLuaScriptModule m_LuaScriptModule;
 	BOOL m_NetworkStarted;
 	int m_TimeZone;
 	time_t m_RealTime;

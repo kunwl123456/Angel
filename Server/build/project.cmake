@@ -83,9 +83,6 @@ function (post_project APP_TYPE)
 	set_target_properties(${TARGET_NAME} PROPERTIES OUTPUT_NAME_RELEASE ${TARGET_NAME})
 	
 	if(UNIX)
-		target_link_directories(${TARGET_NAME}
-			
-		)
 		if(APP_TYPE STREQUAL "SERVER")
 			target_link_libraries(${TARGET_NAME}
 				server_base
@@ -95,7 +92,13 @@ function (post_project APP_TYPE)
 		if(TARGET_TYPE STREQUAL "RUNTIME")
 			target_link_libraries(${TARGET_NAME}
 				base_lib
+				angel_tinyxml
+				event
+				event_core
+				event_extra
+				protobuf
 				expat
+				rt
 				pthread
 			)
 		endif()
@@ -123,6 +126,11 @@ function (post_project APP_TYPE)
 	
 	if(APP_TYPE STREQUAL "SERVER")
 		add_dependencies(${TARGET_NAME} server_base core_lib base_lib)
+	endif()
+	if(TARGET_NAME STREQUAL "server_base")
+		if(TARGET angel_luabind)
+			target_link_libraries(${TARGET_NAME} angel_luabind)
+		endif()
 	endif()
 	
 	if(MSVC)

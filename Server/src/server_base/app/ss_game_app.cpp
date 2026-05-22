@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include <algorithm>
+#include <signal.h>
 
 #include "define/server_def.h"
 
@@ -13,6 +14,8 @@
 #include "app/tapp_runtime.h"
 #include "base_lib/error_code.h"
 #include "base_lib/wbus_network.h"
+#include "base_lib/nf_shm/angel_plugin_runtime.h"
+#include "base_lib/nf_shm/angel_shm_module.h"
 
 int32_t g_nAreaID;
 
@@ -333,6 +336,25 @@ BOOL CSsGameApp::_OnInit()
 		return FALSE;
 	}
 
+	static CAngelShmPlugin s_SharedMemoryPlugin;
+	CAngelShmModule::Instance().SetInitMode(bResume ? ANGEL_OBJ_MODE_RESUME : ANGEL_OBJ_MODE_INIT);
+	CAngelShmModule::Instance().SetCreateMode(bResume ? ANGEL_OBJ_MODE_RESUME : ANGEL_OBJ_MODE_INIT);
+	CAngelPluginRuntime::Instance().Clear();
+	CAngelPluginRuntime::Instance().RegisterPlugin(&s_SharedMemoryPlugin);
+	if (!CAngelPluginRuntime::Instance().Install() ||
+		!CAngelPluginRuntime::Instance().Awake() ||
+		!CAngelPluginRuntime::Instance().Init())
+	{
+		OnInitFail();
+		return FALSE;
+	}
+
+	if (!m_LuaScriptModule.Init("../LuaScript"))
+	{
+		OnInitFail();
+		return FALSE;
+	}
+
 	if (m_Ctx.pszConfFile && strlen(m_Ctx.pszConfFile) > 0)
 	{
 		int32_t nRetCode = tapp_network_init();
@@ -369,6 +391,9 @@ BOOL CSsGameApp::_OnQuit()
 
 BOOL CSsGameApp::_OnFini()
 {
+	m_LuaScriptModule.Shut();
+	CAngelPluginRuntime::Instance().Shut();
+	CAngelPluginRuntime::Instance().Finalize();
 	if (m_NetworkStarted)
 	{
 		tapp_network_uninit();
@@ -417,6 +442,8 @@ BOOL CSsGameApp::_OnTick()
 		OnTimer300();
 	}
 	OnFrame(m_CurFrame);
+	m_LuaScriptModule.Tick();
+	CAngelPluginRuntime::Instance().Tick();
 	return OnTick();
 }
 

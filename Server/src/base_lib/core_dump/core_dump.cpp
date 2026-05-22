@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "shm.h"
 #include "define/server_def.h"
 
 

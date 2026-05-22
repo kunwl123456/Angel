@@ -1,6 +1,8 @@
 #ifndef _WBUS_DEF_H__
 #define _WBUS_DEF_H__
 
+#include <stdio.h>
+
 #include "def/type_def.h"
 
 #if defined(_WIN32) || defined(_WIN64)

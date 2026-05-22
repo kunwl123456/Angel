@@ -4,8 +4,8 @@
 #include <errno.h>
 #include <typeinfo>
 #include <vector>
+#include <map>
 #include "rb_tree.h"
-#include "shm.h"
 
 #ifndef _DEBUG
 #define _DEBUG
@@ -104,6 +104,8 @@ private:
 	};
 
 	CHUNK_HEAD* m_pChunkHead;
+	std::map<uint64_t, T*> m_HeapObjects;
+	typename std::map<uint64_t, T*>::iterator m_HeapIterator;
 
 	BOOL _create_chunk_head(void);
 	BOOL _restore_chunk_head(void);
@@ -121,51 +123,22 @@ private:
 	inline BOOL _is_free_list_empty(void);
 };
 
-/*
 template<class T, uint32_t ALIGN>
 T* CIDObjectPool<T, ALIGN>::get_first_obj(void)
 {
-	if (!m_pChunkHead) goto Exit0;
-	//LOG_PROCESS_ERROR(m_pChunkHead);
-
-	while (m_pChunkHead->m_nCurMapRootIdx < HASH_TABLE_SIZE)
-	{
-		if (m_pChunkHead->m_DataMapRoot[m_pChunkHead->m_nCurMapRootIdx].pRootNode)
-		{
-			m_pChunkHead->m_pCurTreeNode = rb_first(&m_pChunkHead->m_DataMapRoot[m_pChunkHead->m_nCurMapRootIdx]);
-			return _get_data(m_pChunkHead->m_pCurTreeNode);
-		}
-		++m_pChunkHead->m_nCurMapRootIdx;
-	}
-
-Exit0:
-	return NULL;
+	m_HeapIterator = m_HeapObjects.begin();
+	return m_HeapIterator == m_HeapObjects.end() ? NULL : m_HeapIterator->second;
 }
 
 template<class T, uint32_t ALIGN>
 T* CIDObjectPool<T, ALIGN>::get_next_obj(void)
 {
-	RB_TREE_NODE* pNextNode = NULL;
-	if (!m_pChunkHead) goto Exit0;
-	//LOG_PROCESS_ERROR(m_pChunkHead);
-
-	pNextNode = rb_next(m_pChunkHead->m_pCurTreeNode);
-
-	while (!pNextNode && ++m_pChunkHead->m_nCurMapRootIdx < HASH_TABLE_SIZE)
+	if (m_HeapIterator == m_HeapObjects.end())
 	{
-		if (m_pChunkHead->m_DataMapRoot[m_pChunkHead->m_nCurMapRootIdx].pRootNode)
-		{
-			m_pChunkHead->m_pCurTreeNode = rb_first(&m_pChunkHead->m_DataMapRoot[m_pChunkHead->m_nCurMapRootIdx]);
-			break;
-		}
+		return NULL;
 	}
-
-	m_pChunkHead->m_pCurTreeNode = pNextNode;
-
-	return _get_data(m_pChunkHead->m_pCurTreeNode);
-
-Exit0:
-	return NULL;
+	++m_HeapIterator;
+	return m_HeapIterator == m_HeapObjects.end() ? NULL : m_HeapIterator->second;
 }
 
 template<class T, uint32_t ALIGN>
@@ -173,53 +146,161 @@ CIDObjectPool<T, ALIGN>::CIDObjectPool(void)
 {
 	m_szPoolName[0] = 0;
 	m_pChunkHead = NULL;
+	m_HeapIterator = m_HeapObjects.end();
 }
 
 template<class T, uint32_t ALIGN>
 CIDObjectPool<T, ALIGN>::~CIDObjectPool(void)
 {
-
+	clear();
 }
 
 template<class T, uint32_t ALIGN>
-BOOL CIDObjectPool<T, ALIGN>::_create_chunk_head(void)
+BOOL CIDObjectPool<T, ALIGN>::init(int32_t nInitSize, const char* pcszInstanceTag)
 {
-	int32_t nResult = -1;
-	int32_t nRetCode = 0;
-	char szChunkHeadName[ID_POOL_NAME_LEN] = {};
-
-	//alloc memory
-	snprintf(szChunkHeadName, ID_POOL_NAME_LEN, "CH_%s", m_szPoolName);
-	m_pChunkHead = (CHUNK_HEAD*)vm_new_chunk(szChunkHeadName, sizeof(CHUNK_HEAD));
-
-	//LOG_PROCESS_ERROR(m_pChunkHead);
-	if (!m_pChunkHead) return FALSE;
-
-	memset(m_pChunkHead, 0, sizeof(CHUNK_HEAD));
-	m_pChunkHead->m_dwMagic = ID_POOL_HEAD_MAGIC;
-	m_pChunkHead->m_pThisAddr = m_pChunkHead;
-
-	m_pChunkHead->m_FreeListHead.pLeft = NULL;
-	m_pChunkHead->m_FreeListHead.pRight = &m_pChunkHead->m_FreeListRear;
-	m_pChunkHead->m_FreeListRear.pLeft = &m_pChunkHead->m_FreeListHead;
-	m_pChunkHead->m_FreeListRear.pRight = NULL;
-
+	(void)nInitSize;
+	snprintf(m_szPoolName, ID_POOL_NAME_LEN, "%s", pcszInstanceTag ? pcszInstanceTag : "default");
 	return TRUE;
-Exit0:
+}
+
+template<class T, uint32_t ALIGN>
+BOOL CIDObjectPool<T, ALIGN>::restore(const char* szInstanceTag)
+{
+	return init(0, szInstanceTag);
+}
+
+template<class T, uint32_t ALIGN>
+BOOL CIDObjectPool<T, ALIGN>::uninit(void)
+{
+	return clear();
+}
+
+template<class T, uint32_t ALIGN>
+BOOL CIDObjectPool<T, ALIGN>::clear(void)
+{
+	for (typename std::map<uint64_t, T*>::iterator it = m_HeapObjects.begin(); it != m_HeapObjects.end(); ++it)
+	{
+		delete it->second;
+	}
+	m_HeapObjects.clear();
+	m_HeapIterator = m_HeapObjects.end();
+	return TRUE;
+}
+
+template<class T, uint32_t ALIGN>
+T* CIDObjectPool<T, ALIGN>::new_object(uint64_t ID)
+{
+	T* pObject = find(ID);
+	if (pObject)
+	{
+		return pObject;
+	}
+	pObject = new T();
+	m_HeapObjects[ID] = pObject;
+	return pObject;
+}
+
+template<class T, uint32_t ALIGN>
+BOOL CIDObjectPool<T, ALIGN>::delete_object(T* pObject)
+{
+	if (!pObject)
+	{
+		return FALSE;
+	}
+	for (typename std::map<uint64_t, T*>::iterator it = m_HeapObjects.begin(); it != m_HeapObjects.end(); ++it)
+	{
+		if (it->second == pObject)
+		{
+			delete it->second;
+			m_HeapObjects.erase(it);
+			m_HeapIterator = m_HeapObjects.end();
+			return TRUE;
+		}
+	}
 	return FALSE;
 }
 
 template<class T, uint32_t ALIGN>
-BOOL CIDObjectPool<T, ALIGN>::_restore_chunk_head(void)
+T* CIDObjectPool<T, ALIGN>::find(uint64_t ID)
 {
-	int32_t nRetCode = 0;
-	BOOL bOverlap = FALSE;
-	char szChunkHeadName[ID_POOL_NAME_LEN] = {};
-
-	return TRUE;
-Exit0:
-	return FALSE;
+	typename std::map<uint64_t, T*>::iterator it = m_HeapObjects.find(ID);
+	return it == m_HeapObjects.end() ? NULL : it->second;
 }
-*/
+
+template<class T, uint32_t ALIGN>
+T* CIDObjectPool<T, ALIGN>::get(uint64_t index)
+{
+	uint64_t i = 0;
+	for (typename std::map<uint64_t, T*>::iterator it = m_HeapObjects.begin(); it != m_HeapObjects.end(); ++it, ++i)
+	{
+		if (i == index)
+		{
+			return it->second;
+		}
+	}
+	return NULL;
+}
+
+template<class T, uint32_t ALIGN>
+template<class TFunc>
+inline BOOL CIDObjectPool<T, ALIGN>::traverse(TFunc& rFunc)
+{
+	for (typename std::map<uint64_t, T*>::iterator it = m_HeapObjects.begin(); it != m_HeapObjects.end(); ++it)
+	{
+		if (!rFunc(it->second))
+		{
+			return FALSE;
+		}
+	}
+	return TRUE;
+}
+
+template<class T, uint32_t ALIGN>
+inline int32_t CIDObjectPool<T, ALIGN>::get_count()
+{
+	return static_cast<int32_t>(m_HeapObjects.size());
+}
+
+template<class T, uint32_t ALIGN>
+inline int32_t CIDObjectPool<T, ALIGN>::get_size(void)
+{
+	return get_count();
+}
+
+template<class T, uint32_t ALIGN>
+inline int32_t CIDObjectPool<T, ALIGN>::get_free_size(void)
+{
+	return 0;
+}
+
+template<class T, uint32_t ALIGN>
+inline int32_t CIDObjectPool<T, ALIGN>::get_used_size(void)
+{
+	return get_count();
+}
+
+template<class T, uint32_t ALIGN>
+inline int32_t CIDObjectPool<T, ALIGN>::get_obj_size(void)
+{
+	return static_cast<int32_t>(sizeof(T));
+}
+
+template<class T, uint32_t ALIGN>
+void* CIDObjectPool<T, ALIGN>::get_obj_id(T* pObject)
+{
+	for (typename std::map<uint64_t, T*>::iterator it = m_HeapObjects.begin(); it != m_HeapObjects.end(); ++it)
+	{
+		if (it->second == pObject)
+		{
+			return reinterpret_cast<void*>(static_cast<uintptr_t>(it->first));
+		}
+	}
+	return NULL;
+}
+
+template<class T, uint32_t ALIGN>
+void CIDObjectPool<T, ALIGN>::check_fence(void)
+{
+}
 
 #endif

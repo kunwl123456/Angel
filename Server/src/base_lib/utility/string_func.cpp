@@ -1,5 +1,11 @@
 #include "string_func.h"
 #include <assert.h>
+#include <cstring>
+#include <strings.h>
+
+#if !defined(_WIN32) && !defined(_WIN64)
+#define strnicmp strncasecmp
+#endif
 
 // copy string
 void StrCpy(char* szDest, const char* szSrc, int iBufLen)

@@ -2,6 +2,7 @@
 #ifndef FRAM_SERVER_H
 #define FRAM_SERVER_H
 
+#include "base_lib/def/type_def.h"
 
 class CFramServer
 {

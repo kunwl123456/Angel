@@ -2,6 +2,12 @@
 //#include <define/string_def.h>
 #include "base_lib/queue/async_msg_queue.h"
 #include "base_lib//queue/ringbuffer.h"
+#if !defined(_WIN32) && !defined(_WIN64)
+#include <sys/time.h>
+#ifndef timerclear
+#define timerclear(tvp) ((tvp)->tv_sec = (tvp)->tv_usec = 0)
+#endif
+#endif
 #include <event.h>
 #include <event2/util.h>
 #include <event2/listener.h>
@@ -139,7 +145,7 @@ extern "C"
 	{
 		struct timeval newtime;
 		//gettimeofday(&newtime, NULL);
-		evutil_gettimeofday(&newtime, NULL);
+	gettimeofday(&newtime, NULL);
 		time_stamp.llSec = newtime.tv_sec;
 		time_stamp.dwUSec = newtime.tv_usec;
 		time_stamp.dwCumm += process_usec;
@@ -168,7 +174,7 @@ extern "C"
 		if (!info)
 		{
 			bufferevent_free(bev);
-			//打印日志
+			//??????
 			//error_tlog("listener_cb new channel info failed!");
 			return NULL;
 		}
@@ -204,7 +210,7 @@ extern "C"
 			if (pair_addr)
 				opposite_addr = get_opposite_addr(pair_addr->bus1.virtual_addr, pair_addr->bus2.virtual_addr);
 			bufferevent_free(bev);
-			//打印日志
+			//??????
 			//error_tlog("listener_cb new channel<%llu> ip<%s>info failed!" ,channel_id,wbus_addr_ntoa(opposite_addr))
 			return NULL;
 		}
@@ -250,7 +256,7 @@ extern "C"
 
 		getsockopt(st, SOL_SOCKET, SO_ERROR, (char*)&error, &len);
 
-		//! 超时还没连接，就断线处理
+		//! ???????????????????
 		if (error != 0)
 		{
 			_close_link((LINKBASE*)user_data, NULL);
@@ -290,7 +296,7 @@ extern "C"
 		_close_link((LINKBASE*)userdata, bev);
 	}
 
-	//!这里不可能有peer
+	//!??????????peer
 	int32_t new_connect_net_addr(CHANNELID channel_id)
 	{
 		AGBUSPAIRNETADDR* pair_addr = get_cfg_addr_by_channel(channel_id);
@@ -303,7 +309,7 @@ extern "C"
 		serv.sin_addr.s_addr = pair_addr->bus2.net_ip;
 
 		evutil_socket_t fd = -1;
-		//通信的fd放到bufferevent中
+		//????fd???bufferevent??
 		struct bufferevent* bev = NULL;
 		assert_retval(g_event_base, AGERR_INVALID_PARAM);
 		bev = bufferevent_socket_new(g_event_base, fd, BEV_OPT_CLOSE_ON_FREE);
@@ -312,16 +318,16 @@ extern "C"
 		CHANNELINFO* info = _new_channel_info(bev, channel_id, TRUE);
 		assert_retval(info, AGERR_INVALID_PARAM);
 
-		//连接服务器
+		//?????????
 		bufferevent_socket_connect(bev,(struct sockaddr*)&serv,sizeof(serv));
 
-		//设置回调
+		//??????
 		bufferevent_setcb(bev, _conn_channel_readcb, NULL, _client_event_cb, info);
 
-		//设置回调生效
+		//????????Ч
 		bufferevent_enable(bev, EV_READ);
 
-		//创建事件
+		//???????
 		struct event* ev = event_new(g_event_base, -1, EV_TIMEOUT | EV_PERSIST,
 			_connect_cb, info);
 		assert_retval(ev, AGERR_INVALID_PARAM);
@@ -330,7 +336,7 @@ extern "C"
 		evutil_timerclear(&tv);
 		tv.tv_sec = 0;
 		tv.tv_usec = 1000 * WBUS_MAX_CONNECT_TIMER;
-		//添加事件
+		//???????
 		event_add(ev, &tv);
 
 		return AGERR_SUCCESS;
@@ -473,7 +479,7 @@ extern "C"
 		assert_retnone(bev);
 
 		//! client to server peer
-		//peer 是客户端连接上来的数量，从1000开始自增
+		//peer ????????????????????????1000???????
 		PEERINFO* info = _new_peer_info(bev, inet_addr(sa->sa_data),++g_local_info.peer_addr.peer_id);
 		assert_retnone(info);
 
@@ -601,7 +607,7 @@ extern "C"
 			{
 				if ((errno != EAGAIN) && (errno != EINPROGRESS))
 				{
-					//出错
+					//????
 					//error_tlog("conn_readcb,recv fail ,errno %d,%s", errno, strerror(errno));
 					printf("conn_readcb,recv fail ,errno %d,%s", errno, strerror(errno));
 					_close_link(info, bev);
@@ -668,7 +674,7 @@ extern "C"
 			{
 				if ((errno != EAGAIN) && (errno != EINPROGRESS))
 				{
-					//出错
+					//????
 					//error_tlog("conn_readcb,recv fail ,errno %d,%s", errno, strerror(errno));
 					printf("conn_readcb,recv fail ,errno %d,%s", errno, strerror(errno));
 					_close_link(info, bev);
@@ -899,7 +905,7 @@ extern "C"
 	int64_t cur_time()
 	{
 		struct timeval tv;
-		evutil_gettimeofday(&tv, NULL);
+	gettimeofday(&tv, NULL);
 		return tv.tv_sec;
 	}
 #ifdef __cplusplus
