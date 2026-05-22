@@ -52,6 +52,10 @@ BOOL CGameServer::Init(const char* szConfig)
     {
         return FALSE;
     }
+    if (!m_RoleCache.Init())
+    {
+        return FALSE;
+    }
     return TRUE;
 }
 
@@ -61,6 +65,17 @@ BOOL CGameServer::MainLoop(const char* szConfig)
     (void)szConfig;
     CGameWorld::instance().mainloop();
     return TRUE;
+}
+
+BOOL CGameServer::LoadOrCreateRole(uint64_t roleId, uint64_t accountId, const char* name)
+{
+    CRoleData* role = NULL;
+    return m_RoleCache.LoadOrCreateRole(roleId, accountId, name ? name : "", &role);
+}
+
+BOOL CGameServer::FlushRoleData()
+{
+    return m_RoleCache.FlushDirtyRoles();
 }
 
 void CGameServer::CreateReloadThread(const char* szConfig)
@@ -134,6 +149,7 @@ BOOL CGameServerApp::OnQuit()
         SetState(gsstStopWaitForSaveRole);
         break;
     case gsstStopWaitForSaveRole:
+        server->FlushRoleData();
         SetState(gsstStopWaitForPoolClear);
         break;
     case gsstStopWaitForPoolClear:

@@ -5,3 +5,31 @@ package angel.game_data;
 message GameDataPing {
   uint64 ts = 1;
 }
+
+message RoleData {
+  uint64 role_id = 1;
+  uint64 account_id = 2;
+  string name = 3;
+  uint32 level = 4;
+  uint64 last_save_time = 5;
+}
+
+message LoadRoleRequest {
+  uint64 role_id = 1;
+  uint64 account_id = 2;
+  string name = 3;
+}
+
+message LoadRoleResponse {
+  RoleData role = 1;
+  bool created = 2;
+}
+
+message SaveRoleRequest {
+  RoleData role = 1;
+}
+
+message SaveRoleResponse {
+  uint64 role_id = 1;
+  bool ok = 2;
+}

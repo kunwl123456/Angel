@@ -11,6 +11,22 @@ const char* CDbCacheServerApp::GetName() const
 	return "dbcache_server";
 }
 
+BOOL CDbCacheServerApp::OnInit(BOOL bResume)
+{
+	(void)bResume;
+	if (!CSsGameServerApp::OnInit(bResume))
+	{
+		return FALSE;
+	}
+	return m_RoleCache.Init();
+}
+
+BOOL CDbCacheServerApp::OnQuit()
+{
+	m_RoleCache.FlushDirtyRoles();
+	return CSsGameServerApp::OnQuit();
+}
+
 int main(int argc, char* argv[])
 {
 	static CDbCacheServerApp app;

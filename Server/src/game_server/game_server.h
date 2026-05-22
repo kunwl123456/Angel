@@ -3,6 +3,7 @@
 
 #include "fram_server/fram_server.h"
 #include "server_base/ss_game_server_app.h"
+#include "game_data/role_data.h"
 #include    <mutex>
 
 class CGameServer :public CFramServer
@@ -19,6 +20,8 @@ public:
     BOOL Init(const char* szConfig);
 
     BOOL MainLoop(const char* szConfig);
+    BOOL LoadOrCreateRole(uint64_t roleId, uint64_t accountId, const char* name);
+    BOOL FlushRoleData();
 
     void CreateReloadThread(const char* szConfig);
     BOOL _BeginPreExit();
@@ -30,6 +33,7 @@ private:
 private:
     BOOL _InitProcConfig(const char* szConfig);
     static CGameServer* instance;
+    CRoleDataCache m_RoleCache;
 };
 
 class CGameServerApp : public CSsGameServerApp
