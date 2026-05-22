@@ -3,7 +3,7 @@
 
 #include <assert.h>
 
-#if defined(win32) | defined(WIN64)
+#if defined(_WIN32) || defined(_WIN64)
 #define likely(x)    (x)
 #define unlikely(x)  (x)
 #else

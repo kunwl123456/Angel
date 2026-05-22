@@ -1,9 +1,9 @@
 #include "string_func.h"
 #include <assert.h>
 #include <cstring>
-#include <strings.h>
 
 #if !defined(_WIN32) && !defined(_WIN64)
+#include <strings.h>
 #define strnicmp strncasecmp
 #endif
 

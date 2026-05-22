@@ -2,15 +2,17 @@
 //#include <define/string_def.h>
 #include "base_lib/queue/async_msg_queue.h"
 #include "base_lib//queue/ringbuffer.h"
-#if !defined(_WIN32) && !defined(_WIN64)
+#include <event.h>
+#include <event2/util.h>
+#include <event2/listener.h>
+#if defined(_WIN32) || defined(_WIN64)
+#include <Windows.h>
+#else
 #include <sys/time.h>
 #ifndef timerclear
 #define timerclear(tvp) ((tvp)->tv_sec = (tvp)->tv_usec = 0)
 #endif
 #endif
-#include <event.h>
-#include <event2/util.h>
-#include <event2/listener.h>
 //#include <tinyxml.h>
 
 #include "base_lib/wbus.h"
@@ -49,6 +51,25 @@ extern "C"
 	static CIDObjectPool<PEERINFO> g_peer_info_pool;
 	static CRingBuff* g_peer_recv_buff = NULL;
 	static CRingBuff* g_channel_recv_buff = NULL;
+
+	static int angel_gettimeofday(struct timeval* tv)
+	{
+		if (!tv)
+		{
+			return -1;
+		}
+#if defined(_WIN32) || defined(_WIN64)
+		FILETIME ft;
+		GetSystemTimeAsFileTime(&ft);
+		uint64_t ticks = (static_cast<uint64_t>(ft.dwHighDateTime) << 32) | ft.dwLowDateTime;
+		ticks -= 116444736000000000ULL; // Windows epoch to Unix epoch, in 100ns units.
+		tv->tv_sec = static_cast<long>(ticks / 10000000ULL);
+		tv->tv_usec = static_cast<long>((ticks % 10000000ULL) / 10ULL);
+		return 0;
+#else
+		return gettimeofday(tv, NULL);
+#endif
+	}
 
 	static void conn_writecb(struct bufferevent* bev, void* user_data);
 	static void conn_eventcb(struct bufferevent* bev, short events, void* user_data);
@@ -144,8 +165,7 @@ extern "C"
 	int set_time_stamp(NETTIMERSTAP& time_stamp, int process_usec /* = 0 */)
 	{
 		struct timeval newtime;
-		//gettimeofday(&newtime, NULL);
-	gettimeofday(&newtime, NULL);
+		angel_gettimeofday(&newtime);
 		time_stamp.llSec = newtime.tv_sec;
 		time_stamp.dwUSec = newtime.tv_usec;
 		time_stamp.dwCumm += process_usec;
@@ -324,7 +344,7 @@ extern "C"
 		//??????
 		bufferevent_setcb(bev, _conn_channel_readcb, NULL, _client_event_cb, info);
 
-		//????????งน
+		//??????????
 		bufferevent_enable(bev, EV_READ);
 
 		//???????
@@ -905,7 +925,7 @@ extern "C"
 	int64_t cur_time()
 	{
 		struct timeval tv;
-	gettimeofday(&tv, NULL);
+		angel_gettimeofday(&tv);
 		return tv.tv_sec;
 	}
 #ifdef __cplusplus

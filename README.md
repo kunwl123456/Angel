@@ -257,6 +257,13 @@ Angel 现在预留了 LuaBind 脚本模块入口：
 - 构建目录名必须为 **`angel`**，否则不会编译业务进程
 - 若要启用 LuaBind，需同级目录存在 `NFShmXFrame/thirdparty/LuaBind`
 
+**跨平台约束**
+
+- 新增代码需要用 `_WIN32/_WIN64` 与 Linux 分支隔离平台头文件，避免在 Windows 下包含 `sys/*` / `unistd.h` / `strings.h`。
+- WBUS 时间函数通过 Angel 封装处理，Linux 走 `gettimeofday`，Windows 走 `GetSystemTimeAsFileTime`。
+- 共享内存模块 Linux 使用 `shm_open/mmap`，Windows 使用 `CreateFileMapping/MapViewOfFile`。
+- 修改跨平台基础头后，至少跑一次 Linux Docker 构建；Windows 侧建议在 VS Developer PowerShell 下使用 README 的 MSVC 构建命令验证。
+
 **Docker/Linux 验证环境**
 
 本轮 NFShmXFrame 迁移已用 `gcc:11` 容器完成 Debug 构建验证。验证命令如下：
