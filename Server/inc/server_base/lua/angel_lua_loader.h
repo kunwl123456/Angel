@@ -18,6 +18,8 @@ public:
 	virtual ~CAngelLuaLoader();
 
 	BOOL Init(const std::string& scriptRoot);
+	BOOL LoadScriptFile(const std::string& file);
+	BOOL ExecuteString(const std::string& code);
 	BOOL ReloadAllLuaFiles();
 	BOOL ReloadLuaFiles(const std::vector<std::string>& files);
 	BOOL RunGmFunction(const std::string& luaFunc, const std::vector<std::string>& args);
@@ -26,7 +28,7 @@ public:
 	const std::vector<std::string>& GetLoadedFiles() const { return m_LoadedFiles; }
 
 private:
-	BOOL LoadFile(const std::string& file);
+	std::string ResolveScriptPath(const std::string& file) const;
 
 private:
 	std::string m_ScriptRoot;

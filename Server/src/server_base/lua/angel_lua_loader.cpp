@@ -2,6 +2,7 @@
 
 #include "server_base/lua/angel_lua_loader.h"
 
+#include <fstream>
 #include <stdio.h>
 
 CAngelLuaLoader::CAngelLuaLoader()
@@ -31,12 +32,90 @@ BOOL CAngelLuaLoader::Init(const std::string& scriptRoot)
 	return TRUE;
 }
 
+std::string CAngelLuaLoader::ResolveScriptPath(const std::string& file) const
+{
+	if (file.empty())
+	{
+		return file;
+	}
+	if (file.size() > 1 && (file[0] == '/' || file[1] == ':'))
+	{
+		return file;
+	}
+	if (m_ScriptRoot.empty())
+	{
+		return file;
+	}
+	const char tail = m_ScriptRoot[m_ScriptRoot.size() - 1];
+	return m_ScriptRoot + (tail == '/' || tail == '\\' ? "" : "/") + file;
+}
+
+BOOL CAngelLuaLoader::LoadScriptFile(const std::string& file)
+{
+	if (file.empty())
+	{
+		return FALSE;
+	}
+
+	const std::string fullPath = ResolveScriptPath(file);
+	std::ifstream input(fullPath.c_str());
+	if (!input.good())
+	{
+		return FALSE;
+	}
+
+#ifdef ANGEL_WITH_NFSHMXFRAME_LUABIND
+	try
+	{
+		m_LuaContext->doFile(fullPath.c_str());
+	}
+	catch (const LuaIntf::LuaException&)
+	{
+		return FALSE;
+	}
+#endif
+
+	for (size_t i = 0; i < m_LoadedFiles.size(); ++i)
+	{
+		if (m_LoadedFiles[i] == file)
+		{
+			return TRUE;
+		}
+	}
+	m_LoadedFiles.push_back(file);
+	return TRUE;
+}
+
+BOOL CAngelLuaLoader::ExecuteString(const std::string& code)
+{
+	if (code.empty())
+	{
+		return FALSE;
+	}
+#ifdef ANGEL_WITH_NFSHMXFRAME_LUABIND
+	try
+	{
+		m_LuaContext->doString(code.c_str());
+	}
+	catch (const LuaIntf::LuaException&)
+	{
+		return FALSE;
+	}
+#endif
+	return TRUE;
+}
+
 BOOL CAngelLuaLoader::ReloadAllLuaFiles()
 {
-	// Angel keeps this module as the integration point for NFShmXFrame's
-	// LuaBind/LuaIntf stack. The first migration stage records the runtime
-	// contract and keeps script reload safe even before gameplay scripts exist.
+	const std::vector<std::string> files = m_LoadedFiles;
 	m_LoadedFiles.clear();
+	for (size_t i = 0; i < files.size(); ++i)
+	{
+		if (!LoadScriptFile(files[i]))
+		{
+			return FALSE;
+		}
+	}
 	return TRUE;
 }
 
@@ -44,7 +123,7 @@ BOOL CAngelLuaLoader::ReloadLuaFiles(const std::vector<std::string>& files)
 {
 	for (size_t i = 0; i < files.size(); ++i)
 	{
-		if (!LoadFile(files[i]))
+		if (!LoadScriptFile(files[i]))
 		{
 			return FALSE;
 		}
@@ -54,17 +133,30 @@ BOOL CAngelLuaLoader::ReloadLuaFiles(const std::vector<std::string>& files)
 
 BOOL CAngelLuaLoader::RunGmFunction(const std::string& luaFunc, const std::vector<std::string>& args)
 {
-	(void)args;
-	return !luaFunc.empty();
-}
-
-BOOL CAngelLuaLoader::LoadFile(const std::string& file)
-{
-	if (file.empty())
+	if (luaFunc.empty())
 	{
 		return FALSE;
 	}
-	m_LoadedFiles.push_back(file);
+#ifdef ANGEL_WITH_NFSHMXFRAME_LUABIND
+	lua_State* L = m_LuaContext->state();
+	lua_getglobal(L, luaFunc.c_str());
+	if (!lua_isfunction(L, -1))
+	{
+		lua_pop(L, 1);
+		return FALSE;
+	}
+	for (size_t i = 0; i < args.size(); ++i)
+	{
+		lua_pushstring(L, args[i].c_str());
+	}
+	if (lua_pcall(L, static_cast<int>(args.size()), 0, 0) != 0)
+	{
+		lua_pop(L, 1);
+		return FALSE;
+	}
+#else
+	(void)args;
+#endif
 	return TRUE;
 }
 

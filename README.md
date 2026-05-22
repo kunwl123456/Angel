@@ -244,6 +244,7 @@ Angel 现在预留了 LuaBind 脚本模块入口：
 - `server_base/lua/angel_lua_loader.h`：封装脚本根目录、重载脚本、GM 函数调用等基础接口。
 - `CSsGameApp` 生命周期中会初始化 `CAngelLuaScriptModule`，并在主循环中 Tick。
 - CMake 会探测 `../NFShmXFrame/thirdparty/LuaBind`，存在时定义 `ANGEL_WITH_NFSHMXFRAME_LUABIND` 并构建 `angel_luabind` 静态库。
+- LuaLoader 已支持加载脚本文件、执行 Lua 字符串、重载已加载脚本、调用全局 GM 函数。
 
 这一步先保持 Angel 原配置加载方式不被破坏，Lua 配置、热更和 GM 逻辑会在后续业务层逐步接入。
 
