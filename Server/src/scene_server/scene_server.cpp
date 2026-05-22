@@ -13,9 +13,18 @@ const char* CSceneServerApp::GetName() const
 
 BOOL CSceneServerApp::OnInit(BOOL bResume)
 {
-	CSsGameServerApp::OnInit(bResume);
+	if (!CSsGameServerApp::OnInit(bResume))
+	{
+		return FALSE;
+	}
+	m_AoiGrid.Init(1000);
 	// SceneServer consumes MovementFragment-style state sync data in future AOI logic.
 	return TRUE;
+}
+
+BOOL CSceneServerApp::OnTick()
+{
+	return CSsGameServerApp::OnTick();
 }
 
 int main(int argc, char* argv[])

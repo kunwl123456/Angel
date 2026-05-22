@@ -27,6 +27,7 @@ BOOL CGameWorld::init(void)
 	m_pGWData->m_qwCurrentTime = m_pGWData->m_qwStartTime;
 	m_nGSIndex = 0;
 	m_nAreaID = 0;
+	m_AoiGrid.Init(1000);
 
 	return TRUE;
 Exit0:
@@ -100,6 +101,26 @@ uint64_t CGameWorld::generate_obj_id(int32_t eObjType)
 Exit0:
 	return 0;
 
+}
+
+BOOL CGameWorld::enter_world_object(uint64_t objectId, int32_t x, int32_t y)
+{
+	return m_AoiGrid.Enter(objectId, x, y);
+}
+
+BOOL CGameWorld::update_object_movement(uint64_t objectId, const MovementFragment& movement)
+{
+	return m_AoiGrid.Move(objectId, movement);
+}
+
+BOOL CGameWorld::leave_world_object(uint64_t objectId)
+{
+	return m_AoiGrid.Leave(objectId);
+}
+
+BOOL CGameWorld::get_visible_objects(uint64_t objectId, std::vector<uint64_t>& outObjects) const
+{
+	return m_AoiGrid.GetVisible(objectId, outObjects);
 }
 
 

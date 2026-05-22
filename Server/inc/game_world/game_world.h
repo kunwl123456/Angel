@@ -1,7 +1,10 @@
 #ifndef _GAME_WORLD_H__
 #define _GAME_WORLD_H__
 
+#include <vector>
+
 #include "define/id_def.h"
+#include "game_world/aoi_grid.h"
 
 class CGameWorld
 {
@@ -18,6 +21,10 @@ public:
 	inline uint64_t get_current_time(void);
 
 	uint64_t generate_obj_id(int32_t eObjType);
+	BOOL enter_world_object(uint64_t objectId, int32_t x, int32_t y);
+	BOOL update_object_movement(uint64_t objectId, const MovementFragment& movement);
+	BOOL leave_world_object(uint64_t objectId);
+	BOOL get_visible_objects(uint64_t objectId, std::vector<uint64_t>& outObjects) const;
 
 private:
 	BOOL _restore_game_world_data(void);
@@ -41,6 +48,7 @@ private:
 	GAME_WORLD_DATA*			m_pGWData;
 	int32_t						m_nGSIndex;
 	int32_t						m_nAreaID;
+	CAoiGrid					m_AoiGrid;
 
 
 };
