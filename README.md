@@ -379,6 +379,3 @@ Angel 要演进为可用 MMO 服务端，建议按以下顺序推进：
 
 - **对象 ID 生成失败**  
   需确认 `CGameWorld::init` 已在 `game_server` 启动时执行；对象类型必须位于 `otRole` 到 `otTotal` 范围内。
-
-- **和 OpenVideoScribe 的关系**  
-  无代码依赖；本 README 仅参考 [scribe-web/README.md](../scribe-web/README.md) 的文档结构与语气。
