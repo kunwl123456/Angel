@@ -230,10 +230,12 @@ Angel/
 
 - 新增 `base_lib/nf_shm/angel_plugin_runtime.h`：提供 `Install / Awake / Init / Tick / Shut / Finalize` 插件生命周期。
 - 新增 `base_lib/nf_shm/angel_shm_module.h`：集中管理共享内存段、启动模式与对象创建模式。
+- 新增 `base_lib/nf_shm/angel_shm_registry.h`：登记共享内存对象类型、稳定类型 ID、容量和创建/恢复/销毁回调。
 - `base_lib/shm_object.h` 保留为兼容入口，但内部已转向新的 `CAngelShmObject<T>`。
 - 原 `base_lib/shm.h` 与 `src/base_lib/vm/shm.cpp` 已移除，避免新旧共享内存实现并存。
 
 当前迁移重点是把 Angel 接到 NFShmXFrame 的**对象生命周期与插件模型**上；后续业务对象可逐步迁移为更完整的 `NFObject / NFObjectTemplate / ObjSeg` 风格。
+正式业务对象需要显式分配稳定 `typeId`，不能依赖编译器生成名称；详见 [docs/shm-plugin.md](docs/shm-plugin.md)。
 
 ## LuaBind 与脚本模块
 

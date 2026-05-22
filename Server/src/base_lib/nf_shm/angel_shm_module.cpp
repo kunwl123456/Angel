@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "base_lib/nf_shm/angel_shm_module.h"
+#include "base_lib/nf_shm/angel_shm_registry.h"
 
 #if !defined(_WIN32) && !defined(_WIN64)
 #include <fcntl.h>
@@ -189,6 +190,17 @@ void* CAngelShmModule::OpenSegment(const char* name, size_t size)
 	return segment.addr;
 }
 
+void* CAngelShmModule::CreateObjectSegment(int32_t typeId, const char* name, size_t objectSize, int32_t itemCount, BOOL* newlyCreated)
+{
+	if (typeId <= 0 || objectSize == 0 || itemCount < 0)
+	{
+		return NULL;
+	}
+	const size_t count = itemCount > 0 ? static_cast<size_t>(itemCount) : 1;
+	const size_t totalSize = objectSize * count;
+	return CreateSegment(name, totalSize, newlyCreated);
+}
+
 BOOL CAngelShmModule::CloseSegment(const char* name)
 {
 	const std::string normalizedName = NormalizeName(name);
@@ -242,6 +254,10 @@ void CAngelShmModule::ReleaseSegment(SEGMENT& segment)
 
 BOOL CAngelShmPlugin::Awake()
 {
+	if (!CAngelShmRegistry::Instance().Validate())
+	{
+		return FALSE;
+	}
 	return CAngelShmModule::Instance().Init();
 }
 

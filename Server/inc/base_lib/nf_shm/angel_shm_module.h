@@ -34,6 +34,7 @@ public:
 
 	void* CreateSegment(const char* name, size_t size, BOOL* newlyCreated);
 	void* OpenSegment(const char* name, size_t size);
+	void* CreateObjectSegment(int32_t typeId, const char* name, size_t objectSize, int32_t itemCount, BOOL* newlyCreated);
 	BOOL CloseSegment(const char* name);
 	BOOL DestroySegment(const char* name);
 

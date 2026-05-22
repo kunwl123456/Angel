@@ -8,6 +8,7 @@
 
 #include "base_lib/def/type_def.h"
 #include "base_lib/nf_shm/angel_shm_module.h"
+#include "base_lib/nf_shm/angel_shm_registry.h"
 
 #define ANGEL_SHM_OBJECT_TAG 0xA6E15A01
 #define ANGEL_SHM_POOL_NAME_LEN 128
@@ -58,7 +59,7 @@ public:
 	T* create_data()
 	{
 		BOOL newlyCreated = FALSE;
-		void* pMem = CAngelShmModule::Instance().CreateSegment(m_szPoolName, sizeof(SHM_DATA), &newlyCreated);
+		void* pMem = CAngelShmModule::Instance().CreateObjectSegment(GetTypeId(), m_szPoolName, sizeof(SHM_DATA), 1, &newlyCreated);
 		if (!pMem)
 		{
 			return NULL;
@@ -103,6 +104,11 @@ public:
 		}
 		m_pData = NULL;
 		return CAngelShmModule::Instance().DestroySegment(m_szPoolName);
+	}
+
+	static int32_t GetTypeId()
+	{
+		return static_cast<int32_t>(typeid(T).hash_code() & 0x7fffffff);
 	}
 
 private:
